@@ -10,3 +10,71 @@ editor_options:
 library(tidyverse)
 ```
 
+I'm just doing a super quick look at the data right now. Going to load them in, do a simple regression, and see which ones might be the best to move forward with.
+
+
+# Loading default data
+```{r, message=FALSE}
+defaults <- read_csv("data/default-credit-cards.csv", skip = 1)
+```
+
+# Cleaning
+```{r}
+# Making lower case columns
+colnames(defaults) <- defaults %>% 
+  colnames() %>% 
+  tolower()
+
+# Renaming default column
+defaults <- defaults %>% 
+  rename(default = `default payment next month`) %>% 
+  select(-id)
+```
+
+# Quick initial regression
+```{r}
+reg <- glm(default ~ ., family = "binomial", data = defaults)
+
+summary(reg)
+```
+
+# Loading news popularity
+```{r}
+news <- read_csv("data/online-news-popularity.csv")
+```
+
+# Cleaning
+```{r}
+# Getting rid of non-predictive variables
+news <- news %>% 
+  select(-url, -timedelta)
+```
+
+# Quick initial regression
+```{r}
+reg <- lm(shares ~ ., data = news)
+summary(reg)
+```
+
+# Loading student info
+```{r}
+# Student math and Portuguese data
+student_mat <- read_delim("data/student-mat.csv", delim = ";")
+student_por <- read_delim("data/student-por.csv", delim = ";")
+
+# Combining
+student_combined <- inner_join(student_mat, student_por, by = c("school","sex","age","address","famsize","Pstatus","Medu","Fedu","Mjob","Fjob","reason","nursery","internet"))
+```
+
+Okay so, for these data sets there are different numbers of observations. Math has 395, Portuguese has 649, and combined has 382. So I guess there isn't a lot of overlap between the two. Maybe it would be best to just focus on the Portuguese one if we choose this? Just because there are some more observations.
+
+# Quick regressions
+```{r}
+math_reg <- lm(G3 ~ ., data = student_mat)
+por_reg <- lm(G3 ~ ., data = student_por)
+combined_reg <- lm(G3.x ~ ., data = student_combined)
+
+summary(math_reg)
+summary(por_reg)
+summary(combined_reg)
+```

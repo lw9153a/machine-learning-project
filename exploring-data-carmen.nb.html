@@ -262,10 +262,187 @@ x dplyr::lag()    masks stats::lag()</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<p>I’m just doing a super quick look at the data right now. Going to load them in, do a simple regression, and see which ones might be the best to move forward with.</p>
+</div>
+<div id="loading-default-data" class="section level1">
+<h1>Loading default data</h1>
 <!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGVmYXVsdHMgPC0gcmVhZF9jc3YoXCJkYXRhL2RlZmF1bHQtY3JlZGl0LWNhcmRzLmNzdlwiLCBza2lwID0gMSlcblxuYGBgIn0= -->
+<pre class="r"><code>defaults &lt;- read_csv(&quot;data/default-credit-cards.csv&quot;, skip = 1)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG7ilIDilIAgQ29sdW1uIHNwZWNpZmljYXRpb24g4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAXG5jb2xzKFxuICAuZGVmYXVsdCA9IGNvbF9kb3VibGUoKVxuKVxu4oS5IFVzZSBgc3BlYygpYCBmb3IgdGhlIGZ1bGwgY29sdW1uIHNwZWNpZmljYXRpb25zLlxuIn0= -->
+<pre><code>
+── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────
+cols(
+  .default = col_double()
+)
+ℹ Use `spec()` for the full column specifications.</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="cleaning" class="section level1">
+<h1>Cleaning</h1>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBNYWtpbmcgbG93ZXIgY2FzZSBjb2x1bW5zXG5jb2xuYW1lcyhkZWZhdWx0cykgPC0gZGVmYXVsdHMgJT4lIFxuICBjb2xuYW1lcygpICU+JSBcbiAgdG9sb3dlcigpXG5cbiMgUmVuYW1pbmcgZGVmYXVsdCBjb2x1bW5cbmRlZmF1bHRzIDwtIGRlZmF1bHRzICU+JSBcbiAgcmVuYW1lKGRlZmF1bHQgPSBgZGVmYXVsdCBwYXltZW50IG5leHQgbW9udGhgKSAlPiUgXG4gIHNlbGVjdCgtaWQpXG5gYGAifQ== -->
+<pre class="r"><code># Making lower case columns
+colnames(defaults) &lt;- defaults %&gt;% 
+  colnames() %&gt;% 
+  tolower()
+
+# Renaming default column
+defaults &lt;- defaults %&gt;% 
+  rename(default = `default payment next month`) %&gt;% 
+  select(-id)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="quick-initial-regression" class="section level1">
+<h1>Quick initial regression</h1>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnIDwtIGdsbShkZWZhdWx0IH4gLiwgZmFtaWx5ID0gXCJiaW5vbWlhbFwiLCBkYXRhID0gZGVmYXVsdHMpXG5cbnN1bW1hcnkocmVnKVxuYGBgIn0= -->
+<pre class="r"><code>reg &lt;- glm(default ~ ., family = &quot;binomial&quot;, data = defaults)
+
+summary(reg)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="loading-news-popularity" class="section level1">
+<h1>Loading news popularity</h1>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubmV3cyA8LSByZWFkX2NzdihcImRhdGEvb25saW5lLW5ld3MtcG9wdWxhcml0eS5jc3ZcIilcbmBgYCJ9 -->
+<pre class="r"><code>news &lt;- read_csv(&quot;data/online-news-popularity.csv&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="cleaning-1" class="section level1">
+<h1>Cleaning</h1>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="quick-initial-regression-1" class="section level1">
+<h1>Quick initial regression</h1>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnIDwtIGxtKHNoYXJlcyB+IC4sIGRhdGEgPSBuZXdzKVxuc3VtbWFyeShyZWcpXG5gYGAifQ== -->
+<pre class="r"><code>reg &lt;- lm(shares ~ ., data = news)
+summary(reg)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5DYWxsOlxubG0oZm9ybXVsYSA9IHNoYXJlcyB+IC4sIGRhdGEgPSBuZXdzKVxuXG5SZXNpZHVhbHM6XG4gICBNaW4gICAgIDFRIE1lZGlhbiAgICAgM1EgICAgTWF4IFxuLTI5NzM3ICAtMjI1NSAgLTEyMjAgICAtMTA3IDgzNzYyOSBcblxuQ29lZmZpY2llbnRzOiAoMiBub3QgZGVmaW5lZCBiZWNhdXNlIG9mIHNpbmd1bGFyaXRpZXMpXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEVzdGltYXRlIFN0ZC4gRXJyb3IgdCB2YWx1ZSBQcig+fHR8KSAgICBcbihJbnRlcmNlcHQpICAgICAgICAgICAgICAgICAgIC0xLjc2M2UrMDUgIDYuMTMwZSswNiAgLTAuMDI5ICAwLjk3NzA2ICAgIFxubl90b2tlbnNfdGl0bGUgICAgICAgICAgICAgICAgIDguOTg2ZSswMSAgMi44NjdlKzAxICAgMy4xMzQgIDAuMDAxNzMgKiogXG5uX3Rva2Vuc19jb250ZW50ICAgICAgICAgICAgICAgNS45MzZlLTAxICAyLjIzNWUtMDEgICAyLjY1NiAgMC4wMDc5MSAqKiBcbm5fdW5pcXVlX3Rva2VucyAgICAgICAgICAgICAgICAzLjk4NWUrMDMgIDEuOTE5ZSswMyAgIDIuMDc3ICAwLjAzNzc5ICogIFxubl9ub25fc3RvcF93b3JkcyAgICAgICAgICAgICAgLTEuNDg0ZSswMyAgNS45MTFlKzAzICAtMC4yNTEgIDAuODAxODIgICAgXG5uX25vbl9zdG9wX3VuaXF1ZV90b2tlbnMgICAgICAtMS42NDFlKzAzICAxLjYyOWUrMDMgIC0xLjAwNyAgMC4zMTQwNSAgICBcbm51bV9ocmVmcyAgICAgICAgICAgICAgICAgICAgICAyLjY1NGUrMDEgIDYuNzA2ZSswMCAgIDMuOTU4IDcuNThlLTA1ICoqKlxubnVtX3NlbGZfaHJlZnMgICAgICAgICAgICAgICAgLTUuNzY0ZSswMSAgMS43ODJlKzAxICAtMy4yMzUgIDAuMDAxMjIgKiogXG5udW1faW1ncyAgICAgICAgICAgICAgICAgICAgICAgMS4xOTBlKzAxICA4Ljk0MmUrMDAgICAxLjMzMCAgMC4xODMzNiAgICBcbm51bV92aWRlb3MgICAgICAgICAgICAgICAgICAgICA1LjY0NWUrMDAgIDEuNTc1ZSswMSAgIDAuMzU4ICAwLjcyMDA2ICAgIFxuYXZlcmFnZV90b2tlbl9sZW5ndGggICAgICAgICAgLTUuODY3ZSswMiAgMi40MjllKzAyICAtMi40MTYgIDAuMDE1NzAgKiAgXG5udW1fa2V5d29yZHMgICAgICAgICAgICAgICAgICAgNC45NDllKzAxICAzLjcxNGUrMDEgICAxLjMzMyAgMC4xODI2MiAgICBcbmRhdGFfY2hhbm5lbF9pc19saWZlc3R5bGUgICAgIC0xLjA1MGUrMDMgIDMuOTQ3ZSswMiAgLTIuNjYxICAwLjAwNzgwICoqIFxuZGF0YV9jaGFubmVsX2lzX2VudGVydGFpbm1lbnQgLTEuMTgwZSswMyAgMi41NTJlKzAyICAtNC42MjYgMy43NGUtMDYgKioqXG5kYXRhX2NoYW5uZWxfaXNfYnVzICAgICAgICAgICAtOC4wMjNlKzAyICAzLjgyN2UrMDIgIC0yLjA5NiAgMC4wMzYwNSAqICBcbmRhdGFfY2hhbm5lbF9pc19zb2NtZWQgICAgICAgIC02LjAyOWUrMDIgIDMuNzI0ZSswMiAgLTEuNjE5ICAwLjEwNTQyICAgIFxuZGF0YV9jaGFubmVsX2lzX3RlY2ggICAgICAgICAgLTUuNTA5ZSswMiAgMy43MTRlKzAyICAtMS40ODMgIDAuMTM4MDAgICAgXG5kYXRhX2NoYW5uZWxfaXNfd29ybGQgICAgICAgICAtNC44MzFlKzAyICAzLjc2NGUrMDIgIC0xLjI4NCAgMC4xOTkzMSAgICBcbmt3X21pbl9taW4gICAgICAgICAgICAgICAgICAgICAyLjIwOWUrMDAgIDEuNjIzZSswMCAgIDEuMzYxICAwLjE3MzY0ICAgIFxua3dfbWF4X21pbiAgICAgICAgICAgICAgICAgICAgIDguNzE4ZS0wMiAgNS4wMTJlLTAyICAgMS43MzkgIDAuMDgyMDEgLiAgXG5rd19hdmdfbWluICAgICAgICAgICAgICAgICAgICAtMy40NjhlLTAxICAzLjA3OGUtMDEgIC0xLjEyNyAgMC4yNTk5MCAgICBcbmt3X21pbl9tYXggICAgICAgICAgICAgICAgICAgIC0yLjA2N2UtMDMgIDEuMTc0ZS0wMyAgLTEuNzYxICAwLjA3ODE5IC4gIFxua3dfbWF4X21heCAgICAgICAgICAgICAgICAgICAgLTUuMTUzZS0wNCAgNS43ODZlLTA0ICAtMC44OTAgIDAuMzczMjEgICAgXG5rd19hdmdfbWF4ICAgICAgICAgICAgICAgICAgICAtNy4xODZlLTA0ICA4LjI5M2UtMDQgIC0wLjg2NyAgMC4zODYyMSAgICBcbmt3X21pbl9hdmcgICAgICAgICAgICAgICAgICAgIC0zLjY1OWUtMDEgIDcuNTY3ZS0wMiAgLTQuODM2IDEuMzNlLTA2ICoqKlxua3dfbWF4X2F2ZyAgICAgICAgICAgICAgICAgICAgLTIuMDI2ZS0wMSAgMi41MzBlLTAyICAtOC4wMTAgMS4xOGUtMTUgKioqXG5rd19hdmdfYXZnICAgICAgICAgICAgICAgICAgICAgMS42NjJlKzAwICAxLjQzOGUtMDEgIDExLjU1OCAgPCAyZS0xNiAqKipcbnNlbGZfcmVmZXJlbmNlX21pbl9zaGFyZXMgICAgICAyLjYxNWUtMDIgIDcuNTI1ZS0wMyAgIDMuNDc2ICAwLjAwMDUxICoqKlxuc2VsZl9yZWZlcmVuY2VfbWF4X3NoYXJlcyAgICAgIDUuNzYyZS0wMyAgNC4wODNlLTAzICAgMS40MTEgIDAuMTU4MjQgICAgXG5zZWxmX3JlZmVyZW5jZV9hdmdfc2hhcmVzcyAgICAtNS43NzllLTAzICAxLjA0NGUtMDIgIC0wLjU1NCAgMC41Nzk4OSAgICBcbndlZWtkYXlfaXNfbW9uZGF5ICAgICAgICAgICAgICAyLjYwM2UrMDIgIDIuNjMxZSswMiAgIDAuOTg5ICAwLjMyMjQ4ICAgIFxud2Vla2RheV9pc190dWVzZGF5ICAgICAgICAgICAgLTIuNzg1ZSswMiAgMi41OTJlKzAyICAtMS4wNzQgIDAuMjgyNjUgICAgXG53ZWVrZGF5X2lzX3dlZG5lc2RheSAgICAgICAgICAtMS4xMjVlKzAyICAyLjU5MmUrMDIgIC0wLjQzNCAgMC42NjQzMyAgICBcbndlZWtkYXlfaXNfdGh1cnNkYXkgICAgICAgICAgIC0yLjg4OWUrMDIgIDIuNTk3ZSswMiAgLTEuMTEyICAwLjI2NTk5ICAgIFxud2Vla2RheV9pc19mcmlkYXkgICAgICAgICAgICAgLTIuNTA4ZSswMiAgMi42OTBlKzAyICAtMC45MzIgIDAuMzUxMTMgICAgXG53ZWVrZGF5X2lzX3NhdHVyZGF5ICAgICAgICAgICAgMy44NDZlKzAyICAzLjIwNmUrMDIgICAxLjIwMCAgMC4yMzAyNiAgICBcbndlZWtkYXlfaXNfc3VuZGF5ICAgICAgICAgICAgICAgICAgICAgTkEgICAgICAgICBOQSAgICAgIE5BICAgICAgIE5BICAgIFxuaXNfd2Vla2VuZCAgICAgICAgICAgICAgICAgICAgICAgICAgICBOQSAgICAgICAgIE5BICAgICAgTkEgICAgICAgTkEgICAgXG5MREFfMDAgICAgICAgICAgICAgICAgICAgICAgICAgMS43NjJlKzA1ICA2LjEzMGUrMDYgICAwLjAyOSAgMC45NzcwNyAgICBcbkxEQV8wMSAgICAgICAgICAgICAgICAgICAgICAgICAxLjc1M2UrMDUgIDYuMTMwZSswNiAgIDAuMDI5ICAwLjk3NzE5ICAgIFxuTERBXzAyICAgICAgICAgICAgICAgICAgICAgICAgIDEuNzQ5ZSswNSAgNi4xMzBlKzA2ICAgMC4wMjkgIDAuOTc3MjQgICAgXG5MREFfMDMgICAgICAgICAgICAgICAgICAgICAgICAgMS43NTdlKzA1ICA2LjEzMGUrMDYgICAwLjAyOSAgMC45NzcxMyAgICBcbkxEQV8wNCAgICAgICAgICAgICAgICAgICAgICAgICAxLjc1N2UrMDUgIDYuMTMwZSswNiAgIDAuMDI5ICAwLjk3NzEzICAgIFxuZ2xvYmFsX3N1YmplY3Rpdml0eSAgICAgICAgICAgIDIuNDcwZSswMyAgOC41MDZlKzAyICAgMi45MDUgIDAuMDAzNjggKiogXG5nbG9iYWxfc2VudGltZW50X3BvbGFyaXR5ICAgICAgNi43ODllKzAyICAxLjY2OGUrMDMgICAwLjQwNyAgMC42ODM5MSAgICBcbmdsb2JhbF9yYXRlX3Bvc2l0aXZlX3dvcmRzICAgIC0xLjM0M2UrMDQgIDcuMTY1ZSswMyAgLTEuODc0ICAwLjA2MDkwIC4gIFxuZ2xvYmFsX3JhdGVfbmVnYXRpdmVfd29yZHMgICAgIDIuMDk3ZSswMyAgMS4zNjhlKzA0ICAgMC4xNTMgIDAuODc4MTMgICAgXG5yYXRlX3Bvc2l0aXZlX3dvcmRzICAgICAgICAgICAgMi4xMTdlKzAzICA1Ljc3NmUrMDMgICAwLjM2NyAgMC43MTM5NiAgICBcbnJhdGVfbmVnYXRpdmVfd29yZHMgICAgICAgICAgICAyLjAwM2UrMDMgIDUuODIyZSswMyAgIDAuMzQ0ICAwLjczMDg0ICAgIFxuYXZnX3Bvc2l0aXZlX3BvbGFyaXR5ICAgICAgICAgLTEuNjE0ZSswMyAgMS4zNjdlKzAzICAtMS4xODEgIDAuMjM3NjAgICAgXG5taW5fcG9zaXRpdmVfcG9sYXJpdHkgICAgICAgICAtMS45NjVlKzAzICAxLjE0NGUrMDMgIC0xLjcxNyAgMC4wODYwMCAuICBcbm1heF9wb3NpdGl2ZV9wb2xhcml0eSAgICAgICAgICAzLjQ5MmUrMDIgIDQuMzExZSswMiAgIDAuODEwICAwLjQxNzk2ICAgIFxuYXZnX25lZ2F0aXZlX3BvbGFyaXR5ICAgICAgICAgLTEuNzIzZSswMyAgMS4yNTllKzAzICAtMS4zNjkgIDAuMTcwOTIgICAgXG5taW5fbmVnYXRpdmVfcG9sYXJpdHkgICAgICAgICAgMS4yOTVlKzAyICA0LjU4OWUrMDIgICAwLjI4MiAgMC43Nzc4MSAgICBcbm1heF9uZWdhdGl2ZV9wb2xhcml0eSAgICAgICAgIC0xLjgyOGUrMDIgIDEuMDQ3ZSswMyAgLTAuMTc1ICAwLjg2MTM3ICAgIFxudGl0bGVfc3ViamVjdGl2aXR5ICAgICAgICAgICAgLTEuMDAyZSswMiAgMi43NDJlKzAyICAtMC4zNjUgIDAuNzE0NzkgICAgXG50aXRsZV9zZW50aW1lbnRfcG9sYXJpdHkgICAgICAgMi4xMjhlKzAyICAyLjUwNGUrMDIgICAwLjg1MCAgMC4zOTU0OCAgICBcbmFic190aXRsZV9zdWJqZWN0aXZpdHkgICAgICAgICA2LjQ0NWUrMDIgIDMuNjQxZSswMiAgIDEuNzcwICAwLjA3NjY5IC4gIFxuYWJzX3RpdGxlX3NlbnRpbWVudF9wb2xhcml0eSAgIDYuMTA4ZSswMiAgMy45NThlKzAyICAgMS41NDQgIDAuMTIyNzEgICAgXG4tLS1cblNpZ25pZi4gY29kZXM6ICAwIOKAmCoqKuKAmSAwLjAwMSDigJgqKuKAmSAwLjAxIOKAmCrigJkgMC4wNSDigJgu4oCZIDAuMSDigJgg4oCZIDFcblxuUmVzaWR1YWwgc3RhbmRhcmQgZXJyb3I6IDExNTAwIG9uIDM5NTg3IGRlZ3JlZXMgb2YgZnJlZWRvbVxuTXVsdGlwbGUgUi1zcXVhcmVkOiAgMC4wMjMxLFx0QWRqdXN0ZWQgUi1zcXVhcmVkOiAgMC4wMjE3MiBcbkYtc3RhdGlzdGljOiAxNi43MSBvbiA1NiBhbmQgMzk1ODcgREYsICBwLXZhbHVlOiA8IDIuMmUtMTZcbiJ9 -->
+<pre><code>
+Call:
+lm(formula = shares ~ ., data = news)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-29737  -2255  -1220   -107 837629 
+
+Coefficients: (2 not defined because of singularities)
+                                Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)                   -1.763e+05  6.130e+06  -0.029  0.97706    
+n_tokens_title                 8.986e+01  2.867e+01   3.134  0.00173 ** 
+n_tokens_content               5.936e-01  2.235e-01   2.656  0.00791 ** 
+n_unique_tokens                3.985e+03  1.919e+03   2.077  0.03779 *  
+n_non_stop_words              -1.484e+03  5.911e+03  -0.251  0.80182    
+n_non_stop_unique_tokens      -1.641e+03  1.629e+03  -1.007  0.31405    
+num_hrefs                      2.654e+01  6.706e+00   3.958 7.58e-05 ***
+num_self_hrefs                -5.764e+01  1.782e+01  -3.235  0.00122 ** 
+num_imgs                       1.190e+01  8.942e+00   1.330  0.18336    
+num_videos                     5.645e+00  1.575e+01   0.358  0.72006    
+average_token_length          -5.867e+02  2.429e+02  -2.416  0.01570 *  
+num_keywords                   4.949e+01  3.714e+01   1.333  0.18262    
+data_channel_is_lifestyle     -1.050e+03  3.947e+02  -2.661  0.00780 ** 
+data_channel_is_entertainment -1.180e+03  2.552e+02  -4.626 3.74e-06 ***
+data_channel_is_bus           -8.023e+02  3.827e+02  -2.096  0.03605 *  
+data_channel_is_socmed        -6.029e+02  3.724e+02  -1.619  0.10542    
+data_channel_is_tech          -5.509e+02  3.714e+02  -1.483  0.13800    
+data_channel_is_world         -4.831e+02  3.764e+02  -1.284  0.19931    
+kw_min_min                     2.209e+00  1.623e+00   1.361  0.17364    
+kw_max_min                     8.718e-02  5.012e-02   1.739  0.08201 .  
+kw_avg_min                    -3.468e-01  3.078e-01  -1.127  0.25990    
+kw_min_max                    -2.067e-03  1.174e-03  -1.761  0.07819 .  
+kw_max_max                    -5.153e-04  5.786e-04  -0.890  0.37321    
+kw_avg_max                    -7.186e-04  8.293e-04  -0.867  0.38621    
+kw_min_avg                    -3.659e-01  7.567e-02  -4.836 1.33e-06 ***
+kw_max_avg                    -2.026e-01  2.530e-02  -8.010 1.18e-15 ***
+kw_avg_avg                     1.662e+00  1.438e-01  11.558  &lt; 2e-16 ***
+self_reference_min_shares      2.615e-02  7.525e-03   3.476  0.00051 ***
+self_reference_max_shares      5.762e-03  4.083e-03   1.411  0.15824    
+self_reference_avg_sharess    -5.779e-03  1.044e-02  -0.554  0.57989    
+weekday_is_monday              2.603e+02  2.631e+02   0.989  0.32248    
+weekday_is_tuesday            -2.785e+02  2.592e+02  -1.074  0.28265    
+weekday_is_wednesday          -1.125e+02  2.592e+02  -0.434  0.66433    
+weekday_is_thursday           -2.889e+02  2.597e+02  -1.112  0.26599    
+weekday_is_friday             -2.508e+02  2.690e+02  -0.932  0.35113    
+weekday_is_saturday            3.846e+02  3.206e+02   1.200  0.23026    
+weekday_is_sunday                     NA         NA      NA       NA    
+is_weekend                            NA         NA      NA       NA    
+LDA_00                         1.762e+05  6.130e+06   0.029  0.97707    
+LDA_01                         1.753e+05  6.130e+06   0.029  0.97719    
+LDA_02                         1.749e+05  6.130e+06   0.029  0.97724    
+LDA_03                         1.757e+05  6.130e+06   0.029  0.97713    
+LDA_04                         1.757e+05  6.130e+06   0.029  0.97713    
+global_subjectivity            2.470e+03  8.506e+02   2.905  0.00368 ** 
+global_sentiment_polarity      6.789e+02  1.668e+03   0.407  0.68391    
+global_rate_positive_words    -1.343e+04  7.165e+03  -1.874  0.06090 .  
+global_rate_negative_words     2.097e+03  1.368e+04   0.153  0.87813    
+rate_positive_words            2.117e+03  5.776e+03   0.367  0.71396    
+rate_negative_words            2.003e+03  5.822e+03   0.344  0.73084    
+avg_positive_polarity         -1.614e+03  1.367e+03  -1.181  0.23760    
+min_positive_polarity         -1.965e+03  1.144e+03  -1.717  0.08600 .  
+max_positive_polarity          3.492e+02  4.311e+02   0.810  0.41796    
+avg_negative_polarity         -1.723e+03  1.259e+03  -1.369  0.17092    
+min_negative_polarity          1.295e+02  4.589e+02   0.282  0.77781    
+max_negative_polarity         -1.828e+02  1.047e+03  -0.175  0.86137    
+title_subjectivity            -1.002e+02  2.742e+02  -0.365  0.71479    
+title_sentiment_polarity       2.128e+02  2.504e+02   0.850  0.39548    
+abs_title_subjectivity         6.445e+02  3.641e+02   1.770  0.07669 .  
+abs_title_sentiment_polarity   6.108e+02  3.958e+02   1.544  0.12271    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 11500 on 39587 degrees of freedom
+Multiple R-squared:  0.0231,    Adjusted R-squared:  0.02172 
+F-statistic: 16.71 on 56 and 39587 DF,  p-value: &lt; 2.2e-16</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="loading-student-info" class="section level1">
+<h1>Loading student info</h1>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Okay so, for these data sets there are different numbers of observations. Math has 395, Portuguese has 649, and combined has 382. So I guess there isn’t a lot of overlap between the two. Maybe it would be best to just focus on the Portuguese one if we choose this? Just because there are some more observations.</p>
+</div>
+<div id="quick-regressions" class="section level1">
+<h1>Quick regressions</h1>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWF0aF9yZWcgPC0gbG0oRzMgfiAuLCBkYXRhID0gc3R1ZGVudF9tYXQpXG5wb3JfcmVnIDwtIGxtKEczIH4gLiwgZGF0YSA9IHN0dWRlbnRfcG9yKVxuY29tYmluZWRfcmVnIDwtIGxtKEczLnggfiAuLCBkYXRhID0gc3R1ZGVudF9jb21iaW5lZClcblxuc3VtbWFyeShtYXRoX3JlZylcbnN1bW1hcnkocG9yX3JlZylcbnN1bW1hcnkoY29tYmluZWRfcmVnKVxuYGBgIn0= -->
+<pre class="r"><code>math_reg &lt;- lm(G3 ~ ., data = student_mat)
+por_reg &lt;- lm(G3 ~ ., data = student_por)
+combined_reg &lt;- lm(G3.x ~ ., data = student_combined)
+
+summary(math_reg)
+summary(por_reg)
+summary(combined_reg)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiRXhwbG9yaW5nIERhdGEiCm91dHB1dDogaHRtbF9ub3RlYm9vawplZGl0b3Jfb3B0aW9uczogCiAgY2h1bmtfb3V0cHV0X3R5cGU6IGlubGluZQotLS0KCiMgTG9hZGluZyBMaWJyYXJpZXMKYGBge3IsIG1lc3NhZ2U9RkFMU0V9CmxpYnJhcnkodGlkeXZlcnNlKQpgYGAKCg==</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiRXhwbG9yaW5nIERhdGEiCm91dHB1dDogaHRtbF9ub3RlYm9vawplZGl0b3Jfb3B0aW9uczogCiAgY2h1bmtfb3V0cHV0X3R5cGU6IGlubGluZQotLS0KCiMgTG9hZGluZyBMaWJyYXJpZXMKYGBge3IsIG1lc3NhZ2U9RkFMU0V9CmxpYnJhcnkodGlkeXZlcnNlKQpgYGAKCkknbSBqdXN0IGRvaW5nIGEgc3VwZXIgcXVpY2sgbG9vayBhdCB0aGUgZGF0YSByaWdodCBub3cuIEdvaW5nIHRvIGxvYWQgdGhlbSBpbiwgZG8gYSBzaW1wbGUgcmVncmVzc2lvbiwgYW5kIHNlZSB3aGljaCBvbmVzIG1pZ2h0IGJlIHRoZSBiZXN0IHRvIG1vdmUgZm9yd2FyZCB3aXRoLgoKCiMgTG9hZGluZyBkZWZhdWx0IGRhdGEKYGBge3IsIG1lc3NhZ2U9RkFMU0V9CmRlZmF1bHRzIDwtIHJlYWRfY3N2KCJkYXRhL2RlZmF1bHQtY3JlZGl0LWNhcmRzLmNzdiIsIHNraXAgPSAxKQpgYGAKCiMgQ2xlYW5pbmcKYGBge3J9CiMgTWFraW5nIGxvd2VyIGNhc2UgY29sdW1ucwpjb2xuYW1lcyhkZWZhdWx0cykgPC0gZGVmYXVsdHMgJT4lIAogIGNvbG5hbWVzKCkgJT4lIAogIHRvbG93ZXIoKQoKIyBSZW5hbWluZyBkZWZhdWx0IGNvbHVtbgpkZWZhdWx0cyA8LSBkZWZhdWx0cyAlPiUgCiAgcmVuYW1lKGRlZmF1bHQgPSBgZGVmYXVsdCBwYXltZW50IG5leHQgbW9udGhgKSAlPiUgCiAgc2VsZWN0KC1pZCkKYGBgCgojIFF1aWNrIGluaXRpYWwgcmVncmVzc2lvbgpgYGB7cn0KcmVnIDwtIGdsbShkZWZhdWx0IH4gLiwgZmFtaWx5ID0gImJpbm9taWFsIiwgZGF0YSA9IGRlZmF1bHRzKQoKc3VtbWFyeShyZWcpCmBgYAoKIyBMb2FkaW5nIG5ld3MgcG9wdWxhcml0eQpgYGB7cn0KbmV3cyA8LSByZWFkX2NzdigiZGF0YS9vbmxpbmUtbmV3cy1wb3B1bGFyaXR5LmNzdiIpCmBgYAoKIyBDbGVhbmluZwpgYGB7cn0KIyBHZXR0aW5nIHJpZCBvZiBub24tcHJlZGljdGl2ZSB2YXJpYWJsZXMKbmV3cyA8LSBuZXdzICU+JSAKICBzZWxlY3QoLXVybCwgLXRpbWVkZWx0YSkKYGBgCgojIFF1aWNrIGluaXRpYWwgcmVncmVzc2lvbgpgYGB7cn0KcmVnIDwtIGxtKHNoYXJlcyB+IC4sIGRhdGEgPSBuZXdzKQpzdW1tYXJ5KHJlZykKYGBgCgojIExvYWRpbmcgc3R1ZGVudCBpbmZvCmBgYHtyfQojIFN0dWRlbnQgbWF0aCBhbmQgUG9ydHVndWVzZSBkYXRhCnN0dWRlbnRfbWF0IDwtIHJlYWRfZGVsaW0oImRhdGEvc3R1ZGVudC1tYXQuY3N2IiwgZGVsaW0gPSAiOyIpCnN0dWRlbnRfcG9yIDwtIHJlYWRfZGVsaW0oImRhdGEvc3R1ZGVudC1wb3IuY3N2IiwgZGVsaW0gPSAiOyIpCgojIENvbWJpbmluZwpzdHVkZW50X2NvbWJpbmVkIDwtIGlubmVyX2pvaW4oc3R1ZGVudF9tYXQsIHN0dWRlbnRfcG9yLCBieSA9IGMoInNjaG9vbCIsInNleCIsImFnZSIsImFkZHJlc3MiLCJmYW1zaXplIiwiUHN0YXR1cyIsIk1lZHUiLCJGZWR1IiwiTWpvYiIsIkZqb2IiLCJyZWFzb24iLCJudXJzZXJ5IiwiaW50ZXJuZXQiKSkKYGBgCgpPa2F5IHNvLCBmb3IgdGhlc2UgZGF0YSBzZXRzIHRoZXJlIGFyZSBkaWZmZXJlbnQgbnVtYmVycyBvZiBvYnNlcnZhdGlvbnMuIE1hdGggaGFzIDM5NSwgUG9ydHVndWVzZSBoYXMgNjQ5LCBhbmQgY29tYmluZWQgaGFzIDM4Mi4gU28gSSBndWVzcyB0aGVyZSBpc24ndCBhIGxvdCBvZiBvdmVybGFwIGJldHdlZW4gdGhlIHR3by4gTWF5YmUgaXQgd291bGQgYmUgYmVzdCB0byBqdXN0IGZvY3VzIG9uIHRoZSBQb3J0dWd1ZXNlIG9uZSBpZiB3ZSBjaG9vc2UgdGhpcz8gSnVzdCBiZWNhdXNlIHRoZXJlIGFyZSBzb21lIG1vcmUgb2JzZXJ2YXRpb25zLgoKIyBRdWljayByZWdyZXNzaW9ucwpgYGB7cn0KbWF0aF9yZWcgPC0gbG0oRzMgfiAuLCBkYXRhID0gc3R1ZGVudF9tYXQpCnBvcl9yZWcgPC0gbG0oRzMgfiAuLCBkYXRhID0gc3R1ZGVudF9wb3IpCmNvbWJpbmVkX3JlZyA8LSBsbShHMy54IH4gLiwgZGF0YSA9IHN0dWRlbnRfY29tYmluZWQpCgpzdW1tYXJ5KG1hdGhfcmVnKQpzdW1tYXJ5KHBvcl9yZWcpCnN1bW1hcnkoY29tYmluZWRfcmVnKQpgYGA=</div>
 
 
 
