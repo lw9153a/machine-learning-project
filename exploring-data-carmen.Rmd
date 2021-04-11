@@ -1,0 +1,12 @@
+---
+title: "Exploring Data"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+# Loading Libraries
+```{r, message=FALSE}
+library(tidyverse)
+```
+
