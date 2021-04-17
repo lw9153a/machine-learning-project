@@ -10,7 +10,7 @@ editor_options:
 library(tidyverse)
 ```
 
-I'm just doing a super quick look at the data right now. Going to load them in, do a simple regression, and see which ones might be the best to move forward with.
+I'm just doing a super quick look at the data right now. Going to load them in, do a basic regression, and see which ones might be the best to move forward with.
 
 
 # Loading default data
