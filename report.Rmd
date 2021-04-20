@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(here)
 library(tidyverse)
+library(leaps)
 ```
 
 ## Loading in data
@@ -34,7 +35,13 @@ The person who originally collected this data and performed the study was Paulo 
 
 The purpose of our analysis is determine which variables are significant when predicting a student's final grade in the Portuguese class.
 
+Here is our plan for analyzing the data
 
+1) Run a linear regression model with final grade as the response and all other variables as predictors 
+2) Use best subset, forward step, and backwards step to select variables for a reduced model
+3) Use ridge and lasso
+4) Trees & random forest stuff
+5) Use cross validation methods to determine which model predicts final grade with the greatest accuracy
 
 
 ## Running a simple linear regression
@@ -44,9 +51,32 @@ por_reg <- lm(G3 ~ ., data = student_por)
 summary(por_reg)
 ```
 
-A lot of the predictors do not appear to be significant, so we are going to use some variable selection methods to simplify the model while still maintaing accuracy.
+A lot of the predictors do not appear to be significant, so we are going to use some variable selection methods to simplify the model while still maintaining accuracy.
+
+## Best Subset
 
 ```{r}
+subsets <- regsubsets(G3 ~ ., data = student_por)
+summary(subsets)
+summary(subsets)$adjr2
+summary(subsets)$cp
+summary(subsets)$bic
+```
 
+## Forward Step
+
+```{r}
+null <- lm(G3 ~ 1, data = student_por)
+full <- lm(G3 ~ ., data = student_por)
+
+forward <- step(null, scope = list(lower=null, upper = full), direction = "forward")
+
+summary(forward)
+```
+
+```{r}
+backward <- step(full, scope = list(lower=null, upper = full), direction = "backward")
+
+summary(backward)
 ```
 
