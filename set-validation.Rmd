@@ -12,6 +12,7 @@ library(tidyverse)
 ```
 
 # Validation set approach
+## Simple Linear Regression
 ```{r}
 n <- length(student_por)
 
@@ -29,7 +30,41 @@ plot(student_por$G3[-Z], g3_predicted[-Z])
 abline(0,1)
 ```
 
+
 ```{r}
 mean((student_por$G3 - g3_predicted)[-Z] ^ 2)
+```
+
+## Best Subset
+```{r}
+reg.bestsub <- lm(G3 ~ school + sex + address + Mjob + reason + guardian + traveltime + failures + schoolsup + higher + Dalc + health + absences + G1 + G2, data = student_por[Z])
+
+g3_pred_bestsub <- predict(reg.bestsub, student_por)
+```
+
+```{r}
+plot(student_por$G3[-Z], g3_pred_bestsub[-Z])
+abline(0, 1)
+```
+
+```{r}
+mean((student_por$G3 - g3_pred_bestsub)[-Z] ^ 2)
+```
+
+
+## Forwards
+```{r}
+reg.forwards <- lm(G3 ~ school + sex + reason + failures + G1 + G2, data = student_por[Z])
+
+g3_pred_forwards <- predict(reg.forwards, student_por)
+```
+
+```{r}
+plot(student_por$G3[-Z], g3_pred_forwards[-Z])
+abline(0, 1)
+```
+
+```{r}
+mean((student_por$G3 - g3_pred_forwards)[-Z] ^ 2)
 ```
 
