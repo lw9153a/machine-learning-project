@@ -15,6 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(here)
 library(tidyverse)
 library(leaps)
+library(tree)
 ```
 
 ## Loading in data
@@ -23,7 +24,9 @@ library(leaps)
 student_por <- read_delim(here("data", "student-por.csv"), delim = ";")
 ```
 
+
 ## Introduction
+
 For our final project we are looking at the student performance data set from the UCI Machine Learning Repository that measures student performance in a Portuguese class based on a variety of predictors. There predictors include but are not limited to:
 
 - student sex
@@ -40,8 +43,14 @@ Here is our plan for analyzing the data
 1) Run a linear regression model with final grade as the response and all other variables as predictors 
 2) Use best subset, forward step, and backwards step to select variables for a reduced model
 3) Use ridge and lasso
-4) Trees & random forest stuff
-5) Use cross validation methods to determine which model predicts final grade with the greatest accuracy
+4) Use cross validation methods to determine which model predicts final grade with the greatest accuracy
+5) Create a tree using the variables from the best model
+
+## Cleaning Data
+
+```{r}
+
+```
 
 
 ## Running a simple linear regression
@@ -78,5 +87,11 @@ summary(forward)
 backward <- step(full, scope = list(lower=null, upper = full), direction = "backward")
 
 summary(backward)
+```
+
+## Trees
+
+```{r}
+
 ```
 
