@@ -88,6 +88,17 @@ backward <- step(full, scope = list(lower=null, upper = full), direction = "back
 
 summary(backward)
 ```
+## Ridge Regression
+
+```{r}
+
+```
+
+## Lasso Regression
+
+```{r}
+
+```
 
 ## Trees
 
