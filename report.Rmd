@@ -1,0 +1,52 @@
+---
+title: "Final Project"
+author: "London Wagner"
+date: "4/20/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading libraries
+
+```{r}
+library(here)
+library(tidyverse)
+```
+
+## Loading in data
+
+```{r}
+student_por <- read_delim(here("data", "student-por.csv"), delim = ";")
+```
+
+## Introduction
+For our final project we are looking at the student performance data set from the UCI Machine Learning Repository that measures student performance in a Portuguese class based on a variety of predictors. There predictors include but are not limited to:
+
+- student sex
+- student age
+- previous grades
+- access to internet, etc
+
+The person who originally collected this data and performed the study was Paulo Cortez from the University of Minho. 
+
+The purpose of our analysis is determine which variables are significant when predicting a student's final grade in the Portuguese class.
+
+
+
+
+## Running a simple linear regression
+
+```{r}
+por_reg <- lm(G3 ~ ., data = student_por)
+summary(por_reg)
+```
+
+A lot of the predictors do not appear to be significant, so we are going to use some variable selection methods to simplify the model while still maintaing accuracy.
+
+```{r}
+
+```
+
