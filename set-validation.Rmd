@@ -1,0 +1,35 @@
+---
+title: "Set validation"
+author: "Carmen Canedo"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+# Libraries
+```{r, message=FALSE}
+library(tidyverse)
+```
+
+# Validation set approach
+```{r}
+n <- length(student_por)
+
+Z <- sample(n, n / 2)
+
+reg.fit <- lm(G3 ~ ., data = student_por[Z])
+```
+
+```{r}
+g3_predicted <- predict(reg.fit, student_por)
+```
+
+```{r}
+plot(student_por$G3[-Z], g3_predicted[-Z])
+abline(0,1)
+```
+
+```{r}
+mean((student_por$G3 - g3_predicted)[-Z] ^ 2)
+```
+
