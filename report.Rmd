@@ -196,6 +196,24 @@ backward <- step(full, scope = list(lower=null, upper = full), direction = "back
 summary(backward)
 ```
 
+## Set validation
+```{r}
+# RUNNING INTO ERROR: Error in `contrasts<-`(`*tmp*`, value = contr.funs[1 + isOF[nn]]) : 
+  # contrasts can be applied only to factors with 2 or more levels
+# reg.forward <- lm(G3 ~ G2 + G1 + failures + reason + absences + sex + school + traveltime + health, data = student_por, subset = Z)
+
+g3_pred_forward <- predict(reg.forward, student_por)
+```
+
+```{r}
+plot(student_por$G3[-Z], g3_pred_forward[-Z])
+abline(0, 1)
+```
+
+```{r}
+mean((student_por$G3 - g3_pred_forward)[-Z] ^ 2)
+```
+
 ## Ridge Regression & LASSO Preparation
 
 ```{r}
