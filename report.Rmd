@@ -66,7 +66,7 @@ student_por <-
          internet = factor(internet),
          romantic = factor(romantic))
 
-student_por
+head(student_por)
 ```
 
 ## Running a simple linear regression
@@ -74,6 +74,30 @@ student_por
 ```{r}
 por_reg <- lm(G3 ~ ., data = student_por)
 summary(por_reg)
+```
+
+**We should write out the model here**
+
+## Set validation on initial regression
+```{r}
+n <- length(student_por)
+
+Z <- sample(n, n / 2)
+
+reg.fit <- lm(G3 ~ ., data = student_por[Z])
+```
+
+```{r}
+g3_predicted <- predict(reg.fit, student_por)
+```
+
+```{r}
+plot(student_por$G3[-Z], g3_predicted[-Z], xlab = "Actual Grades", ylab = "Predicted Grades", main = "Prediction Accuracy of Full Linear Model")
+abline(0,1)
+```
+
+```{r}
+mean((student_por$G3 - g3_predicted)[-Z] ^ 2)
 ```
 
 A lot of the predictors do not appear to be significant, so we are going to use some variable selection methods to simplify the model while still maintaining accuracy.
@@ -87,6 +111,73 @@ summary(subsets)$adjr2
 summary(subsets)$cp
 summary(subsets)$bic
 ```
+
+## Set validation for Best Subset
+## Best Subset
+```{r}
+which.min(summary(subsets)$adjr2)
+which.min(summary(subsets)$cp)
+which.min(summary(subsets)$bic)
+```
+
+## Model Based on Adjusted R-squared
+```{r}
+set.seed(1)
+Z <- sample(n, n / 2)
+
+reg.bestsubR <- lm(G3 ~ G2, data = student_por, subset = Z)
+
+g3_pred_bestsubR <- predict(reg.bestsubR, student_por)
+```
+
+```{r}
+plot(student_por$G3[-Z], g3_pred_bestsubR[-Z], xlab = "Actual Grades", ylab = "Predicted Grades", main = "Prediction Accuracy of Reduced Model 1")
+abline(0,1)
+```
+
+```{r}
+mean((student_por$G3 - g3_pred_bestsubR)[-Z] ^ 2)
+```
+
+## Model Based on Mallow's Cp
+**ran into error with levels?**
+
+```{r}
+# ACTUAL MODEL
+# reg.bestsubCP <- lm(G3 ~ sex + address + Mjob + reason + guardian + traveltime + failures + Dalc + absences + G1 + G2,
+#                     data = student_por, subset = Z)
+
+reg.bestsubCP <- lm(G3 ~ sex + address  + reason + guardian + traveltime + failures + Dalc + absences + G1 + G2,
+                    data = student_por, subset = Z)
+
+g3_pred_bestsubCP <- predict(reg.bestsubCP, student_por)
+```
+
+```{r}
+plot(student_por$G3[-Z], g3_pred_bestsubCP[-Z], xlab = "Actual Grades", ylab = "Predicted Grades", main = "Prediction Accuracy of Reduced Model 2")
+abline(0,1)
+```
+
+```{r}
+mean((student_por$G3 - g3_pred_bestsubCP)[-Z] ^ 2)
+```
+
+## Model Based on BIC
+```{r}
+reg.bestsubBIC <- lm(G3 ~ reason + G1 + G2, data = student_por, subset = Z)
+
+g3_pred_bestsubBIC <- predict(reg.bestsubBIC, student_por)
+```
+
+```{r}
+plot(student_por$G3[-Z], g3_pred_bestsubBIC[-Z], xlab = "Actual Grades", ylab = "Predicted Grades", main = "Prediction Accuracy of Reduced Model 3")
+abline(0,1)
+```
+
+```{r}
+mean((student_por$G3 - g3_pred_bestsubBIC)[-Z] ^ 2)
+```
+
 
 ## Forward Step
 
