@@ -26,7 +26,7 @@ g3_predicted <- predict(reg.fit, student_por)
 ```
 
 ```{r}
-plot(student_por$G3[-Z], g3_predicted[-Z])
+plot(student_por$G3[-Z], g3_predicted[-Z], xlab = "Actual Grades", ylab = "Predicted Grades", main = "Prediction Accuracy of Full Linear Model")
 abline(0,1)
 ```
 
@@ -54,9 +54,11 @@ mean((student_por$G3 - g3_pred_bestsub)[-Z] ^ 2)
 
 ## Forwards
 ```{r}
-reg.forwards <- lm(G3 ~ school + sex + reason + failures + G1 + G2, data = student_por[Z])
+summary(forward)
 
-g3_pred_forwards <- predict(reg.forwards, student_por)
+reg.forward <- lm(G3 ~ G2 + G1 + failures + reason + absences + sex + school + traveltime + health, data = student_por, subset = Z)
+
+g3_pred_forward <- predict(reg.forward, student_por)
 ```
 
 ```{r}
@@ -68,3 +70,19 @@ abline(0, 1)
 mean((student_por$G3 - g3_pred_forwards)[-Z] ^ 2)
 ```
 
+
+## TESTING
+```{r}
+# null <- lm(G3 ~ 1, data = student_por)
+# full <- lm(G3 ~ ., data = student_por)
+# 
+# forward <- step(null, scope = list(lower=null, upper = full), direction = "forward")
+# 
+# summary(forward)
+```
+
+```{r}
+# backward <- step(full, scope = list(lower=null, upper = full), direction = "backward")
+# 
+# summary(backward)
+```
