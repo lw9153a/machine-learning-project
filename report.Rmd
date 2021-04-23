@@ -28,23 +28,24 @@ student_por <- read_csv2("data/student-por.csv")
 
 ## Introduction
 
-For our final project we are looking at the student performance data set from the UCI Machine Learning Repository that measures student performance in a Portuguese class based on a variety of predictors. There predictors include but are not limited to:
+For our final project we are looking at the student performance data set from the UCI Machine Learning Repository that measures the final student grade in a Portuguese class based on a variety of predictors. These predictors include but are not limited to:
 
 - student sex
 - student age
-- previous grades
+- grades from the past two years 
+- family situation
 - access to internet, etc
 
 The person who originally collected this data and performed the study was Paulo Cortez from the University of Minho. 
 
 The purpose of our analysis is determine which variables are significant when predicting a student's final grade in the Portuguese class.
 
-Here is our plan for analyzing the data
+Here is our plan for analyzing the data:
 
 1) Run a linear regression model with final grade as the response and all other variables as predictors 
 2) Use best subset, forward step, and backwards step to select variables for a reduced model
-3) Use ridge and lasso
-4) Use cross validation methods to determine which model predicts final grade with the greatest accuracy
+3) Use ridge and lasso to conduct further dimension reduction
+4) Use cross validation methods to determine which model predicts the final grade with the greatest accuracy
 5) Create a tree using the variables from the best model
 
 ## Cleaning Data
@@ -69,6 +70,21 @@ student_por <-
 head(student_por)
 ```
 
+## Summary of the data
+Before we begin our analysis, we wish to explore the distribution of the data and confirm it follows a normal distribution.
+
+```{r}
+summary(student_por)
+```
+
+```{r}
+student_por %>% 
+  ggplot(aes(x = G3)) +
+  geom_histogram()
+```
+
+The histogram above is skewed to the left when run our initial linear regression, we will check the residuals and QQ plots.
+
 ## Running a simple linear regression
 
 ```{r}
@@ -76,15 +92,23 @@ por_reg <- lm(G3 ~ ., data = student_por)
 summary(por_reg)
 ```
 
+```{r}
+#par(mfrow = c(2, 2))
+plot(por_reg)
+```
+
+From our results, we can conclude that a simple linear regression might not be the appropriate form of analsis for this data set. We will continue to explore cross validation techniques to compare its prediction accuracy to other models.
+
 **We should write out the model here**
 
 ## Set validation on initial regression
 ```{r}
-n <- length(student_por)
+set.seed(1)
+n <- nrow(student_por)
 
 Z <- sample(n, n / 2)
 
-reg.fit <- lm(G3 ~ ., data = student_por[Z])
+reg.fit <- lm(G3 ~ ., data = student_por, subset = Z)
 ```
 
 ```{r}

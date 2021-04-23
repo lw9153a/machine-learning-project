@@ -14,11 +14,11 @@ library(tidyverse)
 # Validation set approach
 ## Simple Linear Regression
 ```{r}
-n <- length(student_por)
+n <- nrow(student_por)
 
 Z <- sample(n, n / 2)
 
-reg.fit <- lm(G3 ~ ., data = student_por[Z])
+reg.fit <- lm(G3 ~ ., data = student_por, subset = Z)
 ```
 
 ```{r}
