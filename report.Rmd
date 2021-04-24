@@ -1,56 +1,120 @@
 ---
 title: "Final Project"
-author: "London Wagner"
-date: "4/20/2021"
-output: html_document
+author: "London Wagner, Erik Lovece, Carmen Canedo"
+date: "`r Sys.Date()`" # 4/24/21
+output:
+  pdf_document:
+    number_sections: yes
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Loading libraries
-
-```{r message=FALSE}
-# library(here)
+```{r include=FALSE}
 library(leaps)
 library(tree)
 library(glmnet)
 library(tidyverse)
 ```
 
-## Loading in data
+# Introduction
 
-```{r message=FALSE}
-student_por <- read_csv2("data/student-por.csv")
-```
+Our final project analyzes the student performance dataset from the UCI Machine Learning Repository, originally gathered by Paulo Cortez from the University of Minho. This dataset measures the final student grade in a Portuguese class based on a variety of predictors. These predictors cover numerous aspects of not only students' academic lives, but also family life predictors such as parental employment, and personal predictors like whether or not they have home internet access and whether or not they are in a romantic relationship.
 
+We seek to answer the question of what predictors have the greatest influence in how a student does in class. Conventional wisdom seems to dictate that high-achieving students have come from particularly favorable academic, filial, and personal environments, and previous studies have confirmed this. Our model, if properly constructed along the best machine learning practices, should corroborate this, although unexpected conclusions may also lie in store.
 
-## Introduction
-
-For our final project we are looking at the student performance data set from the UCI Machine Learning Repository that measures the final student grade in a Portuguese class based on a variety of predictors. These predictors include but are not limited to:
-
-- student sex
-- student age
-- grades from the past two years 
-- family situation
-- access to internet, etc
-
-The person who originally collected this data and performed the study was Paulo Cortez from the University of Minho. 
-
-The purpose of our analysis is determine which variables are significant when predicting a student's final grade in the Portuguese class.
-
-Here is our plan for analyzing the data:
+Our workflow for finding a sufficient model from which we will draw our conclusions is as follows:
 
 1) Run a linear regression model with final grade as the response and all other variables as predictors 
 2) Use best subset, forward step, and backwards step to select variables for a reduced model
 3) Use ridge and lasso to conduct further dimension reduction
 4) Use cross validation methods to determine which model predicts the final grade with the greatest accuracy
-5) Create a tree using the variables from the best model
+5) Make more definitive determinations based on the chosen model.
 
-## Cleaning Data
+# Loading & Cleaning Data
 
-```{r}
+```{r message=FALSE}
+student_por <- read_csv2("data/student-por.csv")
+
+student_por
+```
+
+The student attributes and grades forming the predictors and response, quoted verbatim from a text file provided with the dataset, are as follows:
+
+1 school - student's school (binary: "GP" - Gabriel Pereira or "MS" - Mousinho da Silveira)
+
+2 sex - student's sex (binary: "F" - female or "M" - male)
+
+3 age - student's age (numeric: from 15 to 22)
+
+4 address - student's home address type (binary: "U" - urban or "R" - rural)
+
+5 famsize - family size (binary: "LE3" - less or equal to 3 or "GT3" - greater than 3)
+
+6 Pstatus - parent's cohabitation status (binary: "T" - living together or "A" - apart)
+
+7 Medu - mother's education (numeric: 0 - none,  1 - primary education (4th grade), 2 – 5th to 9th grade, 3 – secondary education or 4 – higher education)
+
+8 Fedu - father's education (numeric: 0 - none,  1 - primary education (4th grade), 2 – 5th to 9th grade, 3 – secondary education or 4 – higher education)
+
+9 Mjob - mother's job (nominal: "teacher", "health" care related, civil "services" (e.g. administrative or police), "at_home" or "other")
+
+10 Fjob - father's job (nominal: "teacher", "health" care related, civil "services" (e.g. administrative or police), "at_home" or "other")
+
+11 reason - reason to choose this school (nominal: close to "home", school "reputation", "course" preference or "other")
+
+12 guardian - student's guardian (nominal: "mother", "father" or "other")
+
+13 traveltime - home to school travel time (numeric: 1 - <15 min., 2 - 15 to 30 min., 3 - 30 min. to 1 hour, or 4 - >1 hour)
+
+14 studytime - weekly study time (numeric: 1 - <2 hours, 2 - 2 to 5 hours, 3 - 5 to 10 hours, or 4 - >10 hours)
+
+15 failures - number of past class failures (numeric: n if 1<=n<3, else 4)
+
+16 schoolsup - extra educational support (binary: yes or no)
+
+17 famsup - family educational support (binary: yes or no)
+
+18 paid - extra paid classes within the course subject (Math or Portuguese) (binary: yes or no)
+
+19 activities - extra-curricular activities (binary: yes or no)
+
+20 nursery - attended nursery school (binary: yes or no)
+
+21 higher - wants to take higher education (binary: yes or no)
+
+22 internet - Internet access at home (binary: yes or no)
+
+23 romantic - with a romantic relationship (binary: yes or no)
+
+24 famrel - quality of family relationships (numeric: from 1 - very bad to 5 - excellent)
+
+25 freetime - free time after school (numeric: from 1 - very low to 5 - very high)
+
+26 goout - going out with friends (numeric: from 1 - very low to 5 - very high)
+
+27 Dalc - workday alcohol consumption (numeric: from 1 - very low to 5 - very high)
+
+28 Walc - weekend alcohol consumption (numeric: from 1 - very low to 5 - very high)
+
+29 health - current health status (numeric: from 1 - very bad to 5 - very good)
+
+30 absences - number of school absences (numeric: from 0 to 93)
+
+31 G1 - first period grade (numeric: from 0 to 20)
+
+31 G2 - second period grade (numeric: from 0 to 20)
+
+32 G3 - final grade (numeric: from 0 to 20, output target)
+
+For all of our models, `G3` is our response and every other variable serves as a predictor (pending elimination).
+
+# Data Cleaning
+
+When creating our models, some variables need be converting to factors in order to be properly interpreted by the `lm` function. We have converted the necessary variables, so now many of them (with special emphasis on binary variables) are now of type factor.
+
+```{r, include=FALSE}
 student_por <-
   student_por %>%
   mutate(school = factor(school),
@@ -65,17 +129,23 @@ student_por <-
          nursery = factor(nursery),
          higher = factor(higher),
          internet = factor(internet),
-         romantic = factor(romantic))
-
-head(student_por)
+         romantic = factor(romantic),
+         reason = factor(reason))
 ```
 
-## Summary of the data
-Before we begin our analysis, we wish to explore the distribution of the data and confirm it follows a normal distribution.
+```{r}
+student_por
+```
+
+# EDA & Checking Assumptions
+
+Before we begin our analysis, we wish to explore the distribution of the data and confirm it follows the typical assumptions of linear regression.
 
 ```{r}
 summary(student_por)
 ```
+
+Most noteworthy is how G1, G2, and G3's $1^{st}$ quartile of 10 is quite close to the median and mean on the 0-20 scale, yet the minimum in all three is zero. There is a significant gap between the lower and minimum behavior, and these lowest-end students may influence our subsequent analyses in some way.
 
 ```{r}
 student_por %>% 
@@ -83,30 +153,44 @@ student_por %>%
   geom_histogram()
 ```
 
-The histogram above is skewed to the left when run our initial linear regression, we will check the residuals and QQ plots.
+```{r}
+lowest <- filter(student_por, G3 == 0)
+num_lowest <- nrow(lowest)
+num_lowest / nrow(student_por)
 
-## Running a simple linear regression
+lowest
+```
+
+As expected, the lowest-performing students left-skew the distribution of the final scores. However, it is not a couple isolated cases, but 2.3% of the student population in this class. Although there are some commonalities among these students (most of them attended nursery school but did not pay for extra educational support in this subject field, and they all had zero absences), we will later find that most of these factors in common are unimportant in our final models. For now, we run the model taking every student into account.
+
+## Running `lm`
 
 ```{r}
 por_reg <- lm(G3 ~ ., data = student_por)
 summary(por_reg)
 ```
 
+Most variables in our many-variable linear model do not seem useful to us, prompting the use of best subset and dimension-reducing methods. To showcase other model deficiencies, we produce several plots of the residual distribution:
+
 ```{r}
-#par(mfrow = c(2, 2))
+par(mfrow = c(2, 3))
 plot(por_reg)
+
+hist(por_reg$residuals)
+
+shapiro.test(por_reg$residuals)
 ```
 
-From our results, we can conclude that a simple linear regression might not be the appropriate form of analsis for this data set. We will continue to explore cross validation techniques to compare its prediction accuracy to other models.
+We see that the residuals are not randomly distributed per the residual plot and the QQ-plot yields residuals clearly left-skewed from normality. Shapiro-Wilk test run on the residuals gives us the utmost confidence that they do not have normal distribution. Future analysis may seek to analyze the possible high-leverage points and potential outliers as shown in the residuals vs. leverage plot, but this is outside the scope of this project and there are better-fitting methods to consider.
 
-**We should write out the model here**
+## Finding Linear Regression MSE
 
-## Set validation on initial regression
+Even though our initial model does not suit our needs, we can still calculate the prediction MSE as a baseline to compare future models to, anticipating that subsequent models will be more accurate.
+
 ```{r}
 set.seed(1)
 n <- nrow(student_por)
-
-Z <- sample(n, n / 2)
+Z <- sample(n, .7*n)
 
 reg.fit <- lm(G3 ~ ., data = student_por, subset = Z)
 ```
@@ -121,16 +205,25 @@ abline(0,1)
 ```
 
 ```{r}
-mean((student_por$G3 - g3_predicted)[-Z] ^ 2)
+mse_lm <- mean((student_por$G3 - g3_predicted)[-Z]^2)
+mse_lm
 ```
 
-A lot of the predictors do not appear to be significant, so we are going to use some variable selection methods to simplify the model while still maintaining accuracy.
+Despite its flaws, the linear model has a rather low MSE for scores strictly on a 0-20 scale.
 
 ## Best Subset
 
 ```{r}
+# Takes a while to run
+
 subsets <- regsubsets(G3 ~ ., data = student_por, nvmax = 15)
+```
+
+```{r}
 summary(subsets)
+```
+
+```{r}
 summary(subsets)$adjr2
 summary(subsets)$cp
 summary(subsets)$bic
@@ -138,55 +231,34 @@ summary(subsets)$bic
 
 ## Set validation for Best Subset
 ## Best Subset
+
 ```{r}
-which.min(summary(subsets)$adjr2)
-which.min(summary(subsets)$cp)
+which.max(summary(subsets)$adjr2)
+which.min(abs(summary(subsets)$cp - 1:15))
 which.min(summary(subsets)$bic)
 ```
 
-## Model Based on Adjusted R-squared
-```{r}
-set.seed(1)
-Z <- sample(n, n / 2)
-
-reg.bestsubR <- lm(G3 ~ G2, data = student_por, subset = Z)
-
-g3_pred_bestsubR <- predict(reg.bestsubR, student_por)
-```
-
-```{r}
-plot(student_por$G3[-Z], g3_pred_bestsubR[-Z], xlab = "Actual Grades", ylab = "Predicted Grades", main = "Prediction Accuracy of Reduced Model 1")
-abline(0,1)
-```
-
-```{r}
-mean((student_por$G3 - g3_pred_bestsubR)[-Z] ^ 2)
-```
+Didn't use adjr2 model bc they all make little difference.
 
 ## Model Based on Mallow's Cp
-**ran into error with levels?**
 
 ```{r}
-# ACTUAL MODEL
-# reg.bestsubCP <- lm(G3 ~ sex + address + Mjob + reason + guardian + traveltime + failures + Dalc + absences + G1 + G2,
-#                     data = student_por, subset = Z)
-
-reg.bestsubCP <- lm(G3 ~ sex + address  + reason + guardian + traveltime + failures + Dalc + absences + G1 + G2,
-                    data = student_por, subset = Z)
+reg.bestsubCP <- lm(G3 ~ sex + reason + failures + G1 + G2, data = student_por, subset = Z)
 
 g3_pred_bestsubCP <- predict(reg.bestsubCP, student_por)
 ```
 
 ```{r}
-plot(student_por$G3[-Z], g3_pred_bestsubCP[-Z], xlab = "Actual Grades", ylab = "Predicted Grades", main = "Prediction Accuracy of Reduced Model 2")
+plot(student_por$G3[-Z], g3_pred_bestsubCP[-Z], xlab = "Actual Grades", ylab = "Predicted Grades", main = "Predicted vs. Actual Grades of Reduced Model Based on Cp")
 abline(0,1)
 ```
 
 ```{r}
-mean((student_por$G3 - g3_pred_bestsubCP)[-Z] ^ 2)
+mse_cp <- mean((student_por$G3 - g3_pred_bestsubCP)[-Z] ^ 2)
 ```
 
 ## Model Based on BIC
+
 ```{r}
 reg.bestsubBIC <- lm(G3 ~ reason + G1 + G2, data = student_por, subset = Z)
 
@@ -194,37 +266,34 @@ g3_pred_bestsubBIC <- predict(reg.bestsubBIC, student_por)
 ```
 
 ```{r}
-plot(student_por$G3[-Z], g3_pred_bestsubBIC[-Z], xlab = "Actual Grades", ylab = "Predicted Grades", main = "Prediction Accuracy of Reduced Model 3")
+plot(student_por$G3[-Z], g3_pred_bestsubBIC[-Z], xlab = "Actual Grades", ylab = "Predicted Grades", main = "Predicted vs. Actual Grades of Reduced Model Based on BIC")
 abline(0,1)
 ```
 
 ```{r}
-mean((student_por$G3 - g3_pred_bestsubBIC)[-Z] ^ 2)
+mse_bic <- mean((student_por$G3 - g3_pred_bestsubBIC)[-Z] ^ 2)
 ```
 
+## Step Functions
 
-## Forward Step
-
-```{r}
+```{r include=FALSE}
 null <- lm(G3 ~ 1, data = student_por)
 full <- lm(G3 ~ ., data = student_por)
 
 forward <- step(null, scope = list(lower=null, upper = full), direction = "forward")
-
-summary(forward)
+backward <- step(full, scope = list(lower=null, upper = full), direction = "backward")
 ```
 
 ```{r}
-backward <- step(full, scope = list(lower=null, upper = full), direction = "backward")
-
+summary(forward)
 summary(backward)
 ```
 
+Forward and backward step functions yield the exact same model; proceeding with forward step-generated model.
+
 ## Set validation
 ```{r}
-# RUNNING INTO ERROR: Error in `contrasts<-`(`*tmp*`, value = contr.funs[1 + isOF[nn]]) : 
-  # contrasts can be applied only to factors with 2 or more levels
-# reg.forward <- lm(G3 ~ G2 + G1 + failures + reason + absences + sex + school + traveltime + health, data = student_por, subset = Z)
+reg.forward <- lm(G3 ~ G2 + G1 + failures + reason + absences + sex + school + traveltime + health, data = student_por, subset = Z)
 
 g3_pred_forward <- predict(reg.forward, student_por)
 ```
@@ -235,16 +304,16 @@ abline(0, 1)
 ```
 
 ```{r}
-mean((student_por$G3 - g3_pred_forward)[-Z] ^ 2)
+mse_valSet <- mean((student_por$G3 - g3_pred_forward)[-Z] ^ 2)
 ```
 
 ## Ridge Regression & LASSO Preparation
 
 ```{r}
 # Training/test split
-set.seed(1)
-train <- sample(1:nrow(student_por), .7*nrow(student_por))
-G3_test <- student_por$G3[-train]
+# set.seed(1)
+# train <- sample(1:n, n/2)
+G3_test <- student_por$G3[-Z]
 
 # Creating model matrix for rr and lasso calculations
 x_col <- model.matrix(G3 ~ ., student_por)[, -1]
@@ -254,16 +323,18 @@ x_col <- model.matrix(G3 ~ ., student_por)[, -1]
 
 ```{r}
 set.seed(1)
-cv.out1 <- cv.glmnet(x_col, student_por$G3, alpha = 0)
+cv.out1 <- cv.glmnet(x_col, student_por$G3, alpha = 0) # alpha = 0 ---> Ridge regression
 predict(cv.out1, s = cv.out1$lambda.min, type = "coefficients")
 ```
 
 ```{r}
-rr.mod <- glmnet(x_col[train, ], student_por$G3[train], alpha = 0, lambda = cv.out1$lambda.min)
-rr.pred <- predict(rr.mod, s = cv.out1$lambda.min, newx = x_col[-train, ])
+rr.mod <- glmnet(x_col[Z, ], student_por$G3[Z], alpha = 0, lambda = cv.out1$lambda.min)
+rr.pred <- predict(rr.mod, s = cv.out1$lambda.min, newx = x_col[-Z, ])
 
-mean((rr.pred - student_por$G3[-train])^2)
+mse_rr <- mean((rr.pred - student_por$G3[-Z])^2)
 ```
+
+$\lambda = .30$
 
 ## LASSO
 
@@ -273,11 +344,13 @@ cv.out2 <- cv.glmnet(x_col, student_por$G3, alpha = 1)
 predict(cv.out2, s = cv.out2$lambda.min, type = "coefficients")
 ```
 
-```{r}
-lasso.mod <- glmnet(x_col[train, ], student_por$G3[train], alpha = 1, lambda = cv.out2$lambda.min)
-lasso.pred <- predict(lasso.mod, s = cv.out2$lambda.min, newx = x_col[-train, ])
+$\lambda = .10$
 
-mean((lasso.pred - student_por$G3[-train])^2)
+```{r}
+lasso.mod <- glmnet(x_col[Z, ], student_por$G3[Z], alpha = 1, lambda = cv.out2$lambda.min)
+lasso.pred <- predict(lasso.mod, s = cv.out2$lambda.min, newx = x_col[-Z, ])
+
+mse_lasso <- mean((lasso.pred - student_por$G3[-Z])^2)
 ```
 
 ```{r}
@@ -285,9 +358,49 @@ student_por.dimred <- lm(G3 ~ school + sex + reason + failures + G1 + G2, studen
 summary(student_por.dimred)
 ```
 
-## Trees
+## Comparing MSEs
 
 ```{r}
+tibble("method" = c("BIC-Minimized", "Cp-Minimized", "LASSO", "Linear Regression", "Ridge Regression", "AIC-Minimized"),
+       "MSE" = c(mse_bic, mse_cp, mse_lasso, mse_lm, mse_rr, mse_valSet)) %>%
+  arrange(MSE)
+```
 
+```{r}
+reg.bestsubBIC
+reg.forward # Picking this one
+reg.bestsubCP
+```
+
+Picking forward-selected candidate model b/c best balance of number of predictors while sacrificing only a little accuracy.
+
+```{r}
+summary(reg.forward)
+
+summary(
+  lm(formula = G3 ~ G2 + G1 + failures + reason + absences + sex + 
+    school + traveltime + health, data = student_por)
+)
+```
+
+```{r}
+pairs(tibble(student_por$G1,
+             student_por$G2,
+             student_por$failures,
+             student_por$reason,
+             student_por$absences,
+             student_por$school,
+             student_por$traveltime,
+             student_por$health))
+
+cor(data.frame(student_por$G1, student_por$G2))
+
+car::vif(reg.forward)
+
+reg.forward_mod <- lm(G3 ~ G2 + failures + reason + absences + sex + school + traveltime + health, student_por)
+
+summary(reg.forward_mod)
+
+car::vif(reg.forward_mod)
 ```
 
