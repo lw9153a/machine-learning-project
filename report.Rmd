@@ -494,7 +494,7 @@ Let's look at each of these variables and what they mean.
 
 Based on our final model, these are the variables that are significant when attempting to predict a student's final grade in Portuguese class (G3). 
 
-```{r, include = FALSE}
+```{r, include=FALSE}
 pairs(tibble(student_por$G1,
              student_por$G2,
              student_por$failures,
@@ -506,11 +506,11 @@ pairs(tibble(student_por$G1,
 
 cor(data.frame(student_por$G1, student_por$G2))
 
-car::vif(reg.forward)
+car::vif(reg.forward_full)
 
 
-summary(reg.forward_mod)
+summary(reg.forward_full)
 
-car::vif(reg.forward_mod)
+car::vif(reg.forward_full)
 ```
 
