@@ -29,11 +29,11 @@ Our workflow for finding a sufficient model from which we will draw our conclusi
 
 1) Run a linear regression model with final grade as the response and all other variables as predictors 
 2) Use best subset, forward step, and backwards step to select variables for a reduced model
-3) Use ridge and lasso to conduct further dimension reduction
+3) Use ridge, lasso, principal component regression, and partial least squares regression to conduct further dimension reduction
 4) Use cross validation methods to determine which model predicts the final grade with the greatest accuracy
 5) Make more definitive determinations based on the chosen model.
 
-# Loading & Cleaning Data
+# Loading Data
 
 ```{r message=FALSE}
 student_por <- read_csv2("data/student-por.csv")
@@ -140,7 +140,7 @@ student_por
 
 # EDA & Checking Assumptions
 
-Before we begin our analysis, we wish to explore the distribution of the data and confirm it follows the typical assumptions of linear regression.
+Before we begin our analysis, we wish to explore the distribution of the data and confirm it follows the typical assumptions of linear regression. Although we recognize that these assumptions are not as necessary in machine learning, they can be helpful when determining what kind of model we should use to predict our response variable, G3.
 
 ```{r}
 summary(student_por)
@@ -205,14 +205,18 @@ plot(student_por$G3[-Z], g3_predicted[-Z], xlab = "Actual Grades", ylab = "Predi
 abline(0,1)
 ```
 
+We can see on the left side of the graph, when the actual G3 (final grade) is 0, the model tends to overestimate.
+
 ```{r}
 mse_lm <- mean((student_por$G3 - g3_predicted)[-Z]^2)
 mse_lm
 ```
 
-Despite its flaws, the linear model has a rather low MSE for scores strictly on a 0-20 scale.
+Despite its flaws, the linear model has a rather low MSE for scores strictly on a 0-20 scale. When looking for a better model, we will use methods in an attempt to reduce the number of variables or the number of dimensions in the dataset. Therefore we will be using best subset, forward and backwards step, LASSO, Ridge, PCR, and PLS. First, we will start with Best Subset.
 
 ## Best Subset
+
+When initially running our best subset, we decided to cap the number of variables at 15. This was done in order to ensure the model has enough variables to predict G3 accurately without including unnecessary ones that would complicate the model. 
 
 ```{r}
 # Takes a while to run
@@ -220,7 +224,7 @@ Despite its flaws, the linear model has a rather low MSE for scores strictly on 
 subsets <- regsubsets(G3 ~ ., data = student_por, nvmax = 15)
 ```
 
-```{r}
+```{r, include = FALSE}
 summary(subsets)
 ```
 
@@ -239,7 +243,7 @@ which.min(abs(summary(subsets)$cp - 1:15))
 which.min(summary(subsets)$bic)
 ```
 
-Didn't use adjr2 model bc they all make little difference.
+When looking at the adjr2 value, we can tell that they are all relatively the same, ranging from 0.843 to 0.854. Because adding in more variables did not make a significant difference on this value, we are not going to propose a candidate model based on the highest adjr2. Instead, we will move forward with two candidate models, one with five variables as suggested by the Mallow's Cp and one with three variables as suggested by the BIC.
 
 ## Model Based on Mallow's Cp
 
@@ -253,6 +257,8 @@ g3_pred_bestsubCP <- predict(reg.bestsubCP, student_por)
 plot(student_por$G3[-Z], g3_pred_bestsubCP[-Z], xlab = "Actual Grades", ylab = "Predicted Grades", main = "Predicted vs. Actual Grades of Reduced Model Based on Cp")
 abline(0,1)
 ```
+
+Similar to the Predicted vs. Actual Grade plot for the initial linear regression, the Mallow's Cp model (with five variables) overestimates the final grade (G3) when the actual grade is 0. These data points are potential outliers, but removing them is outside of the scope of this project. Otherwise, the model fits the rest of the data well.
 
 ```{r}
 mse_cp <- mean((student_por$G3 - g3_pred_bestsubCP)[-Z] ^ 2)
