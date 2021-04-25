@@ -16,6 +16,7 @@ library(leaps)
 library(tree)
 library(glmnet)
 library(tidyverse)
+library(pls)
 ```
 
 # Introduction
@@ -357,6 +358,40 @@ mse_lasso <- mean((lasso.pred - student_por$G3[-Z])^2)
 student_por.dimred <- lm(G3 ~ school + sex + reason + failures + G1 + G2, student_por)
 summary(student_por.dimred)
 ```
+
+## Principal Component Regression
+
+```{r}
+pcr.fit <- pcr(G3 ~ ., data = student_por, scale = TRUE, validation = "CV")
+summary(pcr.fit)
+```
+
+```{r}
+R2.pcr = as.numeric(R2(pcr.fit, estimate="train")$val)
+MSEP.pcr = as.numeric(MSEP(pcr.fit, estimate="train")$val)
+
+R2.pcr
+MSEP.pcr
+```
+
+PCR attains the lowest prediction MSE = 1.458 when all 42 principal components are included. Because this method leads to a more complicated model and does not allow for variable reduction, I do not think we should consider this as a candidate model. 
+
+## Partial Least Squares Regression
+
+```{r}
+pls.fit <- plsr(G3 ~ ., data = student_por, scale = TRUE, validation = "CV")
+summary(pls.fit)
+```
+
+```{r}
+R2.pls = as.numeric(R2(pls.fit, estimate="train")$val)
+MSEP.pls = as.numeric(MSEP(pls.fit, estimate="train")$val)
+
+R2.pls
+MSEP.pls
+```
+
+PLS attains the lowest predict MSE = 1.458853 with 18 principal components. If we were going to consider one of these models as a candidate model, I would consider sacrificing a little prediction accuracy for simplicity. I would recommend using the model with 10 principal components because the MSE is 1.459062 which is only slightly higher than that with 18 with 8 less principal components. 
 
 ## Comparing MSEs
 
