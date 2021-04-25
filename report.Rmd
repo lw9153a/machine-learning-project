@@ -13,10 +13,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r include=FALSE}
 library(leaps)
-library(tree)
 library(glmnet)
-library(tidyverse)
 library(pls)
+library(car)
+library(tidyverse)
 ```
 
 # Introduction
@@ -374,7 +374,7 @@ R2.pcr
 MSEP.pcr
 ```
 
-PCR attains the lowest prediction MSE = 1.458 when all 42 principal components are included. Because this method leads to a more complicated model and does not allow for variable reduction, I do not think we should consider this as a candidate model. 
+PCR attains the lowest prediction MSE = 1.458 when all 42 principal components are included. This result, which would be overly cumbersome to analyze within this project's scope, does not lend itself well to further analysis compared to more dimension-reduced models. 
 
 ## Partial Least Squares Regression
 
