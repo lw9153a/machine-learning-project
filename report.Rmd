@@ -368,10 +368,10 @@ summary(pcr.fit)
 
 ```{r}
 R2.pcr = as.numeric(R2(pcr.fit, estimate="train")$val)
-MSEP.pcr = as.numeric(MSEP(pcr.fit, estimate="train")$val)
+mse.pcr = as.numeric(MSEP(pcr.fit, estimate="train")$val)
 
 R2.pcr
-MSEP.pcr
+mse.pcr
 ```
 
 PCR attains the lowest prediction MSE = 1.458 when all 42 principal components are included. This result, which would be overly cumbersome to analyze within this project's scope, does not lend itself well to further analysis compared to more dimension-reduced models. 
@@ -385,10 +385,12 @@ summary(pls.fit)
 
 ```{r}
 R2.pls = as.numeric(R2(pls.fit, estimate="train")$val)
-MSEP.pls = as.numeric(MSEP(pls.fit, estimate="train")$val)
+mse.pls = as.numeric(MSEP(pls.fit, estimate="train")$val)
 
 R2.pls
-MSEP.pls
+mse.pls
+
+mse.pls <- mse.pls[10]
 ```
 
 PLS attains the lowest predict MSE = 1.458853 with 18 principal components. If we were going to consider one of these models as a candidate model, I would consider sacrificing a little prediction accuracy for simplicity. I would recommend using the model with 10 principal components because the MSE is 1.459062 which is only slightly higher than that with 18 with 8 less principal components. 
@@ -396,8 +398,8 @@ PLS attains the lowest predict MSE = 1.458853 with 18 principal components. If w
 ## Comparing MSEs
 
 ```{r}
-tibble("method" = c("BIC-Minimized", "Cp-Minimized", "LASSO", "Linear Regression", "Ridge Regression", "AIC-Minimized"),
-       "MSE" = c(mse_bic, mse_cp, mse_lasso, mse_lm, mse_rr, mse_valSet)) %>%
+tibble("method" = c("BIC-Minimized", "Cp-Minimized", "LASSO", "Linear Regression", "Ridge Regression", "AIC-Minimized", "PLS"),
+       "MSE" = c(mse_bic, mse_cp, mse_lasso, mse_lm, mse_rr, mse_valSet, mse.pls)) %>%
   arrange(MSE)
 ```
 
