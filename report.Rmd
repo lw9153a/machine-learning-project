@@ -413,11 +413,6 @@ Picking forward-selected candidate model b/c best balance of number of predictor
 
 ```{r}
 summary(reg.forward)
-
-summary(
-  lm(formula = G3 ~ G2 + G1 + failures + reason + absences + sex + 
-    school + traveltime + health, data = student_por)
-)
 ```
 
 ```{r}
@@ -434,7 +429,7 @@ cor(data.frame(student_por$G1, student_por$G2))
 
 car::vif(reg.forward)
 
-reg.forward_mod <- lm(G3 ~ G2 + failures + reason + absences + sex + school + traveltime + health, student_por)
+reg.forward_full <- lm(G3 ~ G2 + failures + reason + absences + sex + school + traveltime + health, student_por)
 
 summary(reg.forward_mod)
 
