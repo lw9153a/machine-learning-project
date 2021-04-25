@@ -212,7 +212,7 @@ mse_lm <- mean((student_por$G3 - g3_predicted)[-Z]^2)
 mse_lm
 ```
 
-Despite its flaws, the linear model has a rather low MSE for scores strictly on a 0-20 scale. When looking for a better model, we will use methods in an attempt to reduce the number of variables or the number of dimensions in the dataset. Therefore we will be using best subset, forward and backwards step, LASSO, Ridge, PCR, and PLS. First, we will start with Best Subset.
+Despite its flaws, the linear model has a rather low MSE (1.550) for scores strictly on a 0-20 scale. When looking for a better model, we will use methods in an attempt to reduce the number of variables or the number of dimensions in the dataset. Therefore we will be using best subset, forward and backwards step, LASSO, Ridge, PCR, and PLS. First, we will start with Best Subset.
 
 ## Best Subset
 
@@ -247,6 +247,13 @@ When looking at the adjr2 value, we can tell that they are all relatively the sa
 
 ## Model Based on Mallow's Cp
 
+Based on the output from Best Subset, we are going to run a model that includes the variables:
+- sex
+- reason
+- failures
+- G1
+- G2
+
 ```{r}
 reg.bestsubCP <- lm(G3 ~ sex + reason + failures + G1 + G2, data = student_por, subset = Z)
 
@@ -262,9 +269,17 @@ Similar to the Predicted vs. Actual Grade plot for the initial linear regression
 
 ```{r}
 mse_cp <- mean((student_por$G3 - g3_pred_bestsubCP)[-Z] ^ 2)
+mse_cp
 ```
 
+The MSE for the Best Subset Model based on Mallow's C is 1.474.
+
 ## Model Based on BIC
+
+Based on the output from Best Subset, we are going to run a model that includes the variables:
+- reason
+- G1
+- G2
 
 ```{r}
 reg.bestsubBIC <- lm(G3 ~ reason + G1 + G2, data = student_por, subset = Z)
@@ -277,11 +292,18 @@ plot(student_por$G3[-Z], g3_pred_bestsubBIC[-Z], xlab = "Actual Grades", ylab = 
 abline(0,1)
 ```
 
+Again, this plot is very similar to those for the previous models. 
+
 ```{r}
 mse_bic <- mean((student_por$G3 - g3_pred_bestsubBIC)[-Z] ^ 2)
+mse_bic
 ```
 
+The MSE for the Best Subset Model based on BIC is 1.427.
+
 ## Step Functions
+
+Now we are going to be looking at forward and backward step functions.
 
 ```{r include=FALSE}
 null <- lm(G3 ~ 1, data = student_por)
@@ -299,6 +321,18 @@ summary(backward)
 Forward and backward step functions yield the exact same model; proceeding with forward step-generated model.
 
 ## Set validation
+
+Based on the output from Forward Step, we are going to run a model that includes the variables:
+- failures
+- reason
+- absences
+- sex
+- school
+- traveltime
+- health
+- G1
+- G2
+
 ```{r}
 reg.forward <- lm(G3 ~ G2 + G1 + failures + reason + absences + sex + school + traveltime + health, data = student_por, subset = Z)
 
@@ -306,20 +340,20 @@ g3_pred_forward <- predict(reg.forward, student_por)
 ```
 
 ```{r}
-plot(student_por$G3[-Z], g3_pred_forward[-Z])
+plot(student_por$G3[-Z], g3_pred_forward[-Z], xlab = "Actual Grade", ylab = "Predicted Grade", main = "Actual vs. Predicted: Forward Step Model")
 abline(0, 1)
 ```
 
 ```{r}
 mse_valSet <- mean((student_por$G3 - g3_pred_forward)[-Z] ^ 2)
+mse_valSet
 ```
+
+The MSE for the Forward STep Model is 1.459.
 
 ## Ridge Regression & LASSO Preparation
 
 ```{r}
-# Training/test split
-# set.seed(1)
-# train <- sample(1:n, n/2)
 G3_test <- student_por$G3[-Z]
 
 # Creating model matrix for rr and lasso calculations
@@ -327,6 +361,8 @@ x_col <- model.matrix(G3 ~ ., student_por)[, -1]
 ```
 
 ## Ridge Regression
+
+Now we are going to look at Ridge Regression.
 
 ```{r}
 set.seed(1)
@@ -339,11 +375,16 @@ rr.mod <- glmnet(x_col[Z, ], student_por$G3[Z], alpha = 0, lambda = cv.out1$lamb
 rr.pred <- predict(rr.mod, s = cv.out1$lambda.min, newx = x_col[-Z, ])
 
 mse_rr <- mean((rr.pred - student_por$G3[-Z])^2)
+mse_rr
 ```
+
+The MSE for Ridge Regression is 1.597.
 
 $\lambda = .30$
 
 ## LASSO
+
+Next we are going to look at LASSO. 
 
 ```{r}
 set.seed(1)
@@ -358,14 +399,19 @@ lasso.mod <- glmnet(x_col[Z, ], student_por$G3[Z], alpha = 1, lambda = cv.out2$l
 lasso.pred <- predict(lasso.mod, s = cv.out2$lambda.min, newx = x_col[-Z, ])
 
 mse_lasso <- mean((lasso.pred - student_por$G3[-Z])^2)
+mse_lasso
 ```
 
-```{r}
-student_por.dimred <- lm(G3 ~ school + sex + reason + failures + G1 + G2, student_por)
-summary(student_por.dimred)
+The MSE for Lasso is 1.528.
+
+```{r, include = FALSE}
+## student_por.dimred <- lm(G3 ~ school + sex + reason + failures + G1 + G2, student_por)
+## summary(student_por.dimred)
 ```
 
 ## Principal Component Regression
+
+Now we are going to look at principal component regression.
 
 ```{r}
 pcr.fit <- pcr(G3 ~ ., data = student_por, scale = TRUE, validation = "CV")
@@ -380,7 +426,7 @@ R2.pcr
 mse.pcr
 ```
 
-PCR attains the lowest prediction MSE = 1.458 when all 42 principal components are included. This result, which would be overly cumbersome to analyze within this project's scope, does not lend itself well to further analysis compared to more dimension-reduced models. 
+PCR attains the lowest prediction MSE = 1.458 when all 41 principal components are included. This result, which would be overly cumbersome to analyze within this project's scope, does not lend itself well to further analysis compared to more dimension-reduced models. If we were to compromise the number of principal components, we would still need to include 20+ to create a model with an MSE that is comparable to our previous models. Therefore, we will not be suggesting a candidate model based on principal component regression.
 
 ## Partial Least Squares Regression
 
@@ -399,9 +445,11 @@ mse.pls
 mse.pls <- mse.pls[10]
 ```
 
-PLS attains the lowest predict MSE = 1.458853 with 18 principal components. If we were going to consider one of these models as a candidate model, I would consider sacrificing a little prediction accuracy for simplicity. I would recommend using the model with 10 principal components because the MSE is 1.459062 which is only slightly higher than that with 18 with 8 less principal components. 
+PLS attains the lowest predict MSE = 1.458853 with 18 principal components. If we were going to consider one of these models as a candidate model, I would consider sacrificing a little prediction accuracy for simplicity/dimension reduction. I would recommend using the model with 10 principal components because the MSE is 1.459062 which is only slightly higher than that with 18 with 8 fewer principal components. 
 
 ## Comparing MSEs
+
+Now that we have proposed all of our candidate models, we are going to take a look at the MSE to determine our final model.
 
 ```{r}
 tibble("method" = c("BIC-Minimized", "Cp-Minimized", "LASSO", "Linear Regression", "Ridge Regression", "AIC-Minimized", "PLS"),
@@ -409,19 +457,25 @@ tibble("method" = c("BIC-Minimized", "Cp-Minimized", "LASSO", "Linear Regression
   arrange(MSE)
 ```
 
+Based on the MSE, we are going to examine the top three models and determine which one has the best balance of number of predictors and accuracy.
+
 ```{r}
 reg.bestsubBIC
 reg.forward # Picking this one
-reg.bestsubCP
 ```
 
-Picking forward-selected candidate model b/c best balance of number of predictors while sacrificing only a little accuracy.
+Picking forward-selected candidate model because best balance of number of predictors while sacrificing only a little accuracy.
+
+# Conclusion
 
 ```{r}
-summary(reg.forward)
+reg.forward_full <- lm(G3 ~ G1 + G2 + failures + reason + absences + sex + school + traveltime + health, student_por)
+
+summary(reg.forward_full)
 ```
 
-```{r}
+
+```{r, include = FALSE}
 pairs(tibble(student_por$G1,
              student_por$G2,
              student_por$failures,
@@ -435,7 +489,6 @@ cor(data.frame(student_por$G1, student_por$G2))
 
 car::vif(reg.forward)
 
-reg.forward_full <- lm(G3 ~ G2 + failures + reason + absences + sex + school + traveltime + health, student_por)
 
 summary(reg.forward_mod)
 
