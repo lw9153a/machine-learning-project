@@ -481,15 +481,15 @@ $$ \widehat{G3} = 0.441 + 0.137 (G1) + 0.880 (G2) -0.240(failures) - 0.092(reaso
 
 Let's look at each of these variables and what they mean.
 
-- G1 is the student's grade during the first term
-- G2 is the student's grade during the second term
-- Failures is the number of past class failures a student had
-- Reason is the reason a student attended a certain school
-- Absences is the number of absences a student had
-- Sex is the sex of the student
-- School is a the name of the school the student attended
-- Traveltime is the amount of time it took a student to get to school
-- Health is the current health status of the student
+- `G1` is the student's grade during the first term
+- `G2` is the student's grade during the second term
+- `failures` is the number of past class failures a student had
+- `reason` is the reason a student attended a certain school (3 dummy variables, with "course" as the baseline)
+- `absences` is the number of absences a student had
+- `sex` is the sex of the student (1 dummy variable with "female" as the baseline)
+- `school` is a the name of the school the student attended (1 dummy variable with "Gabriel Pereira" as the baseline)
+- `traveltime` is the amount of time it took a student to get to school
+- `health` is the current health status of the student on a numerical scale from 1 (worst) to 5 (best)
 
 Based on our final model, these are the variables that are significant when attempting to predict a student's final grade in Portuguese class (G3). 
 
