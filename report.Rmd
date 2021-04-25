@@ -235,7 +235,6 @@ summary(subsets)$bic
 ```
 
 ## Set validation for Best Subset
-## Best Subset
 
 ```{r}
 which.max(summary(subsets)$adjr2)
