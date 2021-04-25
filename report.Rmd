@@ -477,7 +477,9 @@ summary(reg.forward_full)
 
 Our final model is as follows:
 
-$$ \widehat{G3} = 0.441 + 0.137 (G1) + 0.880 (G2) -0.240(failures) - 0.092(reasonhome) - 0.450(reasonother) - 0.165(reasonrep) + 0.016(absences) - 0.200(sexMale) - 0.230(schoolMS) + 0.112(traveltime) - 0.054(health)$$
+$$ \widehat{G3} = 0.441 + 0.137 (G1) + 0.880 (G2) -0.240(failures) - 0.092(reasonhome) - 
+0.450(reasonother) - 0.165(reasonrep) + 0.016(absences) - 0.200(sexMale) - 0.230(schoolMS) + 
+0.112(traveltime) - 0.054(health)$$
 
 Let's look at each of these variables and what they mean.
 
