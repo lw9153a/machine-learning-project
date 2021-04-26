@@ -343,7 +343,7 @@ g3_pred_forward <- predict(reg.forward, student_por)
 ```
 
 ```{r, echo = FALSE}
-plot(student_por$G3[-Z], g3_pred_forward[-Z], xlab = "Actual Grade", ylab = "Predicted Grade", main = "Actual vs. Predicted: Forward Step Model")
+plot(student_por$G3[-Z], g3_pred_forward[-Z], xlab = "Actual Grade", ylab = "Predicted Grade", main = "Predicted vs. Actual Values: Forward Step Model")
 abline(0, 1)
 ```
 
