@@ -500,7 +500,7 @@ Let's look at each of these variables and what they mean.
 - `traveltime` is the amount of time it took a student to get to school
 - `health` is the current health status of the student on a numerical scale from 1 (worst) to 5 (best)
 
-Based on our final model, these are the variables that are significant when attempting to predict a student's final grade in Portuguese class (G3). 
+Based on our final model, these are the variables that are significant when attempting to predict a student's final grade in Portuguese class (G3). The most pertinent predictors primarily concern a student's academic life. Their family situation and personal factors like romantic status are not deemed to be as important by this or our other candidate models.
 
 ```{r, include=FALSE}
 pairs(tibble(student_por$G1,
